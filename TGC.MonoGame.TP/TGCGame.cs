@@ -105,6 +105,7 @@ namespace TGC.MonoGame.TP
 
 
             //cargo los modelos de los autos comunes en sus posiciones iniciales 
+            //a una lista de matrices de mundo
             var rotacion = Quaternion.CreateFromAxisAngle(-Vector3.UnitY, MathHelper.Pi / 3);
             var matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
@@ -121,6 +122,24 @@ namespace TGC.MonoGame.TP
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(0f, 0f, -100f);
+            this.UbicacionesAutosComunes.Add(matrizInicial);
+
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
+            matrizInicial = Matrix.CreateScale(0.4f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(0f, -80f, -100f);
+            this.UbicacionesAutosComunes.Add(matrizInicial);
+
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
+            matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(0f, 50f, -100f);
+            this.UbicacionesAutosComunes.Add(matrizInicial);
+
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
+            matrizInicial = Matrix.CreateScale(0.1f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(-80f, 30f, -100f);
             this.UbicacionesAutosComunes.Add(matrizInicial);
 
             base.LoadContent();
@@ -171,16 +190,21 @@ namespace TGC.MonoGame.TP
                 }
             }
 
-            //no ubico este modelo
+            //se pudo cargar el modelo del auto de batalla pero no lo puedo transladar
+            //bien al frustum
+
+            /*
             foreach (var mesh in battleCarModel.Meshes)
             {
                 World = mesh.ParentBone.Transform *
-                    Matrix.CreateScale(0.5f);
+                    Matrix.CreateScale(0.1f) *
+                    Matrix.CreateTranslation(-200f, -450f, -300f);
 
                 Effect.Parameters["DiffuseColor"].SetValue(Color.DarkBlue.ToVector3());
                 Effect.Parameters["World"].SetValue(World);
                 mesh.Draw();
             }
+            */
 
         }
 
