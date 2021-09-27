@@ -56,10 +56,10 @@ namespace TGC.MonoGame.TP.Modelos
                 MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * VelocidadTranslacion);
 
             //ESCALADOS
-            if (estadoTeclado.IsKeyDown(Keys.Add) && estadoTeclado.IsKeyDown(Keys.LeftShift))
+            if (estadoTeclado.IsKeyDown(Keys.Subtract) && estadoTeclado.IsKeyDown(Keys.LeftShift))
                 MatrizMundo = Matrix.CreateScale(elapsedTime * 50) * MatrizMundo;
 
-            if (estadoTeclado.IsKeyDown(Keys.Subtract) && estadoTeclado.IsKeyDown(Keys.LeftShift))
+            if (estadoTeclado.IsKeyDown(Keys.Add) && estadoTeclado.IsKeyDown(Keys.LeftShift))
                 MatrizMundo = Matrix.CreateScale(1 / (elapsedTime * 50)) * MatrizMundo;
 
 

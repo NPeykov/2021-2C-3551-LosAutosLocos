@@ -44,11 +44,12 @@ namespace TGC.MonoGame.TP
         private Model CarModel { get; set; }
         private Model battleCarModel { get; set; }
         private Effect Effect { get; set; }
-        private Matrix World { get; set; }
-        private Matrix View { get; set; }
-        private Matrix Projection { get; set; }
+        //private Matrix World { get; set; }
+        //private Matrix View { get; set; }
+        //private Matrix Projection { get; set; }
         private float Rotation { get; set; }
-        private Camera freeCamera { get; set; }
+        private FreeCamera FreeCamera { get; set; }
+        private TargetCamera TargetCamera { get; set; }
         private QuadPrimitive quad { get; set; }
         private String ubicacionModelo { get; set; }
         private TipoDeCamara tipoDeCamara { get; set; }
@@ -76,14 +77,15 @@ namespace TGC.MonoGame.TP
             // Seria hasta aca.
 
             // Configuramos nuestras matrices de la escena.
-            World = Matrix.Identity;
-            View = Matrix.CreateLookAt(Vector3.UnitZ, Vector3.Zero, Vector3.Up);
-            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 1, 250);
+            //World = Matrix.Identity;
+            //View = Matrix.CreateLookAt(Vector3.UnitZ, Vector3.Zero, Vector3.Up);
+            //Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 1, 250);
 
             UbicacionesAutosComunes = new List<Matrix>();
             AutosNormales = new List<Modelo>();
 
-            freeCamera = new FreeCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.UnitZ);
+            TargetCamera = new TargetCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f, Vector3.Zero);
+            FreeCamera = new FreeCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f);
 
             tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
 
@@ -189,7 +191,7 @@ namespace TGC.MonoGame.TP
 
             KeyboardState estadoTeclado = Keyboard.GetState();
 
-            freeCamera.Update(gameTime);
+            FreeCamera.Update(gameTime);
 
             if (estadoTeclado.IsKeyDown(Keys.Escape))
                 Exit();
@@ -226,13 +228,13 @@ namespace TGC.MonoGame.TP
 
             //Actualizo projeccion segun tipo de camara
             if (tipoDeCamara == TipoDeCamara.ORIGINAL_SCENE) {
-                Effect.Parameters["View"].SetValue(View);
-                Effect.Parameters["Projection"].SetValue(Projection);
+                Effect.Parameters["View"].SetValue(TargetCamera.View);
+                Effect.Parameters["Projection"].SetValue(TargetCamera.Projection);
             }
 
             if (tipoDeCamara == TipoDeCamara.FREE_VIEW) {
-                Effect.Parameters["View"].SetValue(freeCamera.View);
-                Effect.Parameters["Projection"].SetValue(freeCamera.Projection);
+                Effect.Parameters["View"].SetValue(FreeCamera.View);
+                Effect.Parameters["Projection"].SetValue(FreeCamera.Projection);
             }
 
 
