@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TGC.MonoGame.TP.Cameras;
+using TGC.MonoGame.TP.FigurasBasicas;
 
 namespace TGC.MonoGame.TP
 {
@@ -38,6 +39,7 @@ namespace TGC.MonoGame.TP
 
         private GraphicsDeviceManager Graphics { get; }
         private SpriteBatch SpriteBatch { get; set; }
+        private SpriteFont spriteFont { get; set; }
         private Model CarModel { get; set; }
         private Model battleCarModel { get; set; }
         private Effect Effect { get; set; }
@@ -46,6 +48,9 @@ namespace TGC.MonoGame.TP
         private Matrix Projection { get; set; }
         private float Rotation { get; set; }
         private Camera freeCamera { get; set; }
+        private QuadPrimitive quad { get; set; }
+
+        private String ubicacionModelo { get; set; }
 
         private TipoDeCamara tipoDeCamara { get; set; }
 
@@ -77,6 +82,7 @@ namespace TGC.MonoGame.TP
 
             tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
 
+
             base.Initialize();
         }
 
@@ -89,6 +95,7 @@ namespace TGC.MonoGame.TP
         {
             // Aca es donde deberiamos cargar todos los contenido necesarios antes de iniciar el juego.
             SpriteBatch = new SpriteBatch(GraphicsDevice);
+            
 
             CarModel = Content.Load<Model>(ContentFolder3D + "cars/RacingCar");
 
@@ -97,6 +104,8 @@ namespace TGC.MonoGame.TP
             // Cargo un efecto basico propio declarado en el Content pipeline.
             // En el juego no pueden usar BasicEffect de MG, deben usar siempre efectos propios.
             Effect = Content.Load<Effect>(ContentFolderEffects + "BasicShader");
+
+            spriteFont = Content.Load<SpriteFont>(ContentFolderSpriteFonts + "Arial");
 
 
             // Asigno el efecto que cargue a cada parte del mesh.
@@ -149,6 +158,10 @@ namespace TGC.MonoGame.TP
                 Matrix.CreateTranslation(-80f, 30f, -100f);
             this.UbicacionesAutosComunes.Add(matrizInicial);
 
+
+            quad = new QuadPrimitive(GraphicsDevice);
+
+
             base.LoadContent();
         }
 
@@ -172,6 +185,13 @@ namespace TGC.MonoGame.TP
 
             if (estadoTeclado.IsKeyDown(Keys.F2))
                 tipoDeCamara = TipoDeCamara.FREE_VIEW;
+
+            if (estadoTeclado.IsKeyDown(Keys.F3)) {
+                Console.Write(UbicacionesAutosComunes[0].Translation.ToString());
+                Console.Write("\r");
+            }
+                
+
 
             // Basado en el tiempo que paso se va generando una rotacion.
             Rotation += Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
@@ -214,10 +234,16 @@ namespace TGC.MonoGame.TP
                 }
             }
 
+            Effect.Parameters["DiffuseColor"].SetValue(Color.Green.ToVector3());
+
+            //quad.Draw(World, View, Projection);
+            quad.Draw(Effect);
+
+
             //se pudo cargar el modelo del auto de batalla pero no lo puedo transladar
             //bien al frustum
 
-            /*
+            
             foreach (var mesh in battleCarModel.Meshes)
             {
                 World = mesh.ParentBone.Transform *
@@ -228,8 +254,13 @@ namespace TGC.MonoGame.TP
                 Effect.Parameters["World"].SetValue(World);
                 mesh.Draw();
             }
-            */
 
+
+            ubicacionModelo = UbicacionesAutosComunes[0].Translation.ToString();
+
+            SpriteBatch.Begin();
+            SpriteBatch.DrawString(spriteFont, "modelo actual: " + ubicacionModelo, new Vector2(0, 0), Color.Red);
+            SpriteBatch.End();
         }
 
         /// <summary>
