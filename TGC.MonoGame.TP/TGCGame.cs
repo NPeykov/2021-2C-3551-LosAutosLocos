@@ -54,6 +54,7 @@ namespace TGC.MonoGame.TP
         private String ubicacionModelo { get; set; }
         private TipoDeCamara tipoDeCamara { get; set; }
         private List<Modelo> AutosNormales { get; set; }
+        private Texture2D FloorTexture { get; set; }
 
         private int IndexListaModelo { get; set; }
 
@@ -114,6 +115,7 @@ namespace TGC.MonoGame.TP
 
             spriteFont = Content.Load<SpriteFont>(ContentFolderSpriteFonts + "Arial");
 
+            FloorTexture = Content.Load<Texture2D>(ContentFolderTextures + "stones");
 
             // Asigno el efecto que cargue a cada parte del mesh.
             // Un modelo puede tener mas de 1 mesh internamente.
@@ -258,7 +260,7 @@ namespace TGC.MonoGame.TP
             }*/
 
             Effect.Parameters["DiffuseColor"].SetValue(Color.Green.ToVector3());
-
+            Effect.Parameters["ModelTexture"].SetValue(FloorTexture);
             //quad.Draw(World, View, Projection);
             quad.Draw(Effect);
 

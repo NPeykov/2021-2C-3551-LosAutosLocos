@@ -21,14 +21,29 @@ float3 DiffuseColor;
 
 float Time = 0;
 
+texture ModelTexture;
+
+sampler2D textureSampler = sampler_state
+{
+	Texture = (ModelTexture);
+	MagFilter = Linear;
+	MinFilter = Linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
 struct VertexShaderInput
 {
 	float4 Position : POSITION0;
+
+	float2 TextureCoordinate : TEXCOORD0;
 };
 
 struct VertexShaderOutput
 {
 	float4 Position : SV_POSITION;
+
+	float2 TextureCoordinate : TEXCOORD0;
 };
 
 VertexShaderOutput MainVS(in VertexShaderInput input)
@@ -42,12 +57,18 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	// View space to Projection space
     output.Position = mul(viewPosition, Projection);
 
+	output.TextureCoordinate = input.TextureCoordinate;
+
     return output;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    return float4(DiffuseColor, 1.0);
+	float4 TextureColor = tex2D(textureSampler, input.TextureCoordinate);
+	TextureColor.a = 0.5;
+
+	//devuelvo un color mezclado para poder distingir el auto seleccionado (que es magenta)
+	return TextureColor + float4(DiffuseColor, 0.5);
 }
 
 technique BasicColorDrawing
