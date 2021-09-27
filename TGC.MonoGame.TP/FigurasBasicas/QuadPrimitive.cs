@@ -58,13 +58,13 @@ namespace TGC.MonoGame.TP.FigurasBasicas
 
             var vertices = new[]
             {
-                // Possitive X, Possitive Z
+                //POINT A: Possitive X, Possitive Z
                 new VertexPositionNormalTexture(Vector3.UnitX + Vector3.UnitZ, Vector3.Up, textureCoordinateUpperRight),
-                // Possitive X, Negative Z
+                //POINT B: Possitive X, Negative Z
                 new VertexPositionNormalTexture(Vector3.UnitX - Vector3.UnitZ, Vector3.Up, textureCoordinateLowerRight),
-                // Negative X, Possitive Z
+                //POINT C: Negative X, Possitive Z
                 new VertexPositionNormalTexture(Vector3.UnitZ - Vector3.UnitX, Vector3.Up, textureCoordinateUpperLeft),
-                // Negative X, Negative Z
+                //POINT D: Negative X, Negative Z
                 new VertexPositionNormalTexture(-Vector3.UnitX - Vector3.UnitZ, Vector3.Up, textureCoordinateLowerLeft)
             };
 

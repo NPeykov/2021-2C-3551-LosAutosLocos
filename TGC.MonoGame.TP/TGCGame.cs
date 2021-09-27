@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TGC.MonoGame.TP.Cameras;
 using TGC.MonoGame.TP.FigurasBasicas;
+using TGC.MonoGame.TP.Modelos;
 
 namespace TGC.MonoGame.TP
 {
@@ -49,10 +50,13 @@ namespace TGC.MonoGame.TP
         private float Rotation { get; set; }
         private Camera freeCamera { get; set; }
         private QuadPrimitive quad { get; set; }
-
         private String ubicacionModelo { get; set; }
-
         private TipoDeCamara tipoDeCamara { get; set; }
+        private List<Modelo> AutosNormales { get; set; }
+
+        private int IndexListaModelo { get; set; }
+
+        private int CantidadModelos { get; set; }
 
         private List<Matrix> UbicacionesAutosComunes;
         /// <summary>
@@ -77,6 +81,7 @@ namespace TGC.MonoGame.TP
             Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 1, 250);
 
             UbicacionesAutosComunes = new List<Matrix>();
+            AutosNormales = new List<Modelo>();
 
             freeCamera = new FreeCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.UnitZ);
 
@@ -126,41 +131,50 @@ namespace TGC.MonoGame.TP
             var matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(100f, 0f, -100f);
-            UbicacionesAutosComunes.Add(matrizInicial);
+            //UbicacionesAutosComunes.Add(matrizInicial);
+            AutosNormales.Add(new AutoNormal(CarModel, matrizInicial, Color.Red));
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 3);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(-100f, 0f, -100f);
-            this.UbicacionesAutosComunes.Add(matrizInicial);
+            //UbicacionesAutosComunes.Add(matrizInicial);
+            AutosNormales.Add(new AutoNormal(CarModel, matrizInicial, Color.White));
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathHelper.Pi / 8);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(0f, 0f, -100f);
-            this.UbicacionesAutosComunes.Add(matrizInicial);
+            //UbicacionesAutosComunes.Add(matrizInicial);
+            AutosNormales.Add(new AutoNormal(CarModel, matrizInicial, Color.Red));
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
             matrizInicial = Matrix.CreateScale(0.4f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(0f, -80f, -100f);
-            this.UbicacionesAutosComunes.Add(matrizInicial);
+            //UbicacionesAutosComunes.Add(matrizInicial);
+            AutosNormales.Add(new AutoNormal(CarModel, matrizInicial, Color.Blue));
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(0f, 50f, -100f);
-            this.UbicacionesAutosComunes.Add(matrizInicial);
+            //UbicacionesAutosComunes.Add(matrizInicial);
+            AutosNormales.Add(new AutoNormal(CarModel, matrizInicial, Color.Green));
+
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
             matrizInicial = Matrix.CreateScale(0.1f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(-80f, 30f, -100f);
-            this.UbicacionesAutosComunes.Add(matrizInicial);
-
+            //UbicacionesAutosComunes.Add(matrizInicial);
+            AutosNormales.Add(new AutoNormal(CarModel, matrizInicial, Color.GreenYellow));
 
             quad = new QuadPrimitive(GraphicsDevice);
 
+            CantidadModelos = AutosNormales.Count;
+
+            IndexListaModelo = 0;
 
             base.LoadContent();
         }
@@ -186,12 +200,14 @@ namespace TGC.MonoGame.TP
             if (estadoTeclado.IsKeyDown(Keys.F2))
                 tipoDeCamara = TipoDeCamara.FREE_VIEW;
 
-            if (estadoTeclado.IsKeyDown(Keys.F3)) {
-                Console.Write(UbicacionesAutosComunes[0].Translation.ToString());
-                Console.Write("\r");
+            if (estadoTeclado.IsKeyDown(Keys.M)) {
+                if (CantidadModelos - 1 > IndexListaModelo)
+                    IndexListaModelo++;
+                else
+                    IndexListaModelo = 0;
             }
-                
 
+            AutosNormales[IndexListaModelo].Update(gameTime);
 
             // Basado en el tiempo que paso se va generando una rotacion.
             Rotation += Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
@@ -208,9 +224,7 @@ namespace TGC.MonoGame.TP
             // Aca deberiamos poner toda la logia de renderizado del juego.
             GraphicsDevice.Clear(Color.Black);
 
-            // Para dibujar le modelo necesitamos pasarle informacion que el efecto esta esperando.
-
-
+            //Actualizo projeccion segun tipo de camara
             if (tipoDeCamara == TipoDeCamara.ORIGINAL_SCENE) {
                 Effect.Parameters["View"].SetValue(View);
                 Effect.Parameters["Projection"].SetValue(Projection);
@@ -221,9 +235,16 @@ namespace TGC.MonoGame.TP
                 Effect.Parameters["Projection"].SetValue(freeCamera.Projection);
             }
 
+
+
             Effect.Parameters["DiffuseColor"].SetValue(Color.DarkRed.ToVector3());
 
-            
+
+            foreach (var auto in AutosNormales)
+            {
+                auto.Draw(Effect);
+            }
+            /*
             foreach (var ubicacion in UbicacionesAutosComunes) {
                 foreach (var mesh in CarModel.Meshes)
                 {
@@ -232,7 +253,7 @@ namespace TGC.MonoGame.TP
                     Effect.Parameters["World"].SetValue(World);
                     mesh.Draw();
                 }
-            }
+            }*/
 
             Effect.Parameters["DiffuseColor"].SetValue(Color.Green.ToVector3());
 
@@ -243,7 +264,7 @@ namespace TGC.MonoGame.TP
             //se pudo cargar el modelo del auto de batalla pero no lo puedo transladar
             //bien al frustum
 
-            
+            /*
             foreach (var mesh in battleCarModel.Meshes)
             {
                 World = mesh.ParentBone.Transform *
@@ -253,10 +274,12 @@ namespace TGC.MonoGame.TP
                 Effect.Parameters["DiffuseColor"].SetValue(Color.DarkBlue.ToVector3());
                 Effect.Parameters["World"].SetValue(World);
                 mesh.Draw();
-            }
+            }*/
 
 
-            ubicacionModelo = UbicacionesAutosComunes[0].Translation.ToString();
+            //ubicacionModelo = UbicacionesAutosComunes[0].Translation.ToString();
+
+            ubicacionModelo = AutosNormales[IndexListaModelo].getWorldMatrixAsString();
 
             SpriteBatch.Begin();
             SpriteBatch.DrawString(spriteFont, "modelo actual: " + ubicacionModelo, new Vector2(0, 0), Color.Red);
