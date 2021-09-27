@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using TGC.MonoGame.TP.Cameras;
 
 namespace TGC.MonoGame.TP
 {
@@ -44,6 +45,9 @@ namespace TGC.MonoGame.TP
         private Matrix View { get; set; }
         private Matrix Projection { get; set; }
         private float Rotation { get; set; }
+        private Camera freeCamera { get; set; }
+
+        private TipoDeCamara tipoDeCamara { get; set; }
 
         private List<Matrix> UbicacionesAutosComunes;
         /// <summary>
@@ -64,11 +68,14 @@ namespace TGC.MonoGame.TP
 
             // Configuramos nuestras matrices de la escena.
             World = Matrix.Identity;
-            View = Matrix.CreateLookAt(Vector3.UnitZ * 150, Vector3.Zero, Vector3.Up);
-            Projection =
-                Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 1, 250);
+            View = Matrix.CreateLookAt(Vector3.UnitZ, Vector3.Zero, Vector3.Up);
+            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 1, 250);
 
             UbicacionesAutosComunes = new List<Matrix>();
+
+            freeCamera = new FreeCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.UnitZ);
+
+            tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
 
             base.Initialize();
         }
@@ -152,12 +159,19 @@ namespace TGC.MonoGame.TP
         /// </summary>
         protected override void Update(GameTime gameTime)
         {
-            // Aca deberiamos poner toda la logica de actualizacion del juego.
 
-            // Capturar Input teclado
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-                //Salgo del juego.
+            KeyboardState estadoTeclado = Keyboard.GetState();
+
+            freeCamera.Update(gameTime);
+
+            if (estadoTeclado.IsKeyDown(Keys.Escape))
                 Exit();
+
+            if (estadoTeclado.IsKeyDown(Keys.F1))
+                tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
+
+            if (estadoTeclado.IsKeyDown(Keys.F2))
+                tipoDeCamara = TipoDeCamara.FREE_VIEW;
 
             // Basado en el tiempo que paso se va generando una rotacion.
             Rotation += Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
@@ -175,8 +189,18 @@ namespace TGC.MonoGame.TP
             GraphicsDevice.Clear(Color.Black);
 
             // Para dibujar le modelo necesitamos pasarle informacion que el efecto esta esperando.
-            Effect.Parameters["View"].SetValue(View);
-            Effect.Parameters["Projection"].SetValue(Projection);
+
+
+            if (tipoDeCamara == TipoDeCamara.ORIGINAL_SCENE) {
+                Effect.Parameters["View"].SetValue(View);
+                Effect.Parameters["Projection"].SetValue(Projection);
+            }
+
+            if (tipoDeCamara == TipoDeCamara.FREE_VIEW) {
+                Effect.Parameters["View"].SetValue(freeCamera.View);
+                Effect.Parameters["Projection"].SetValue(freeCamera.Projection);
+            }
+
             Effect.Parameters["DiffuseColor"].SetValue(Color.DarkRed.ToVector3());
 
             
