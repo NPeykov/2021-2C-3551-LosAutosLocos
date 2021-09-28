@@ -162,7 +162,13 @@ namespace TGC.MonoGame.TP.Modelos
 
         public String getWorldMatrixAsString()
         {
-            return this.MatrizMundo.ToString().Replace('{', '\n').Replace('}', ' ');
+            String posicion = MatrizMundo.Translation.ToString();
+            String vectorUp = MatrizMundo.Up.ToString();
+            String vectorFoward = MatrizMundo.Forward.ToString();
+            return "POSICION: " + posicion + '\n'
+                + "VECTOR UP: " + vectorUp + '\n'
+                + "VECTOR FOWARD: " + vectorFoward;
+            //return this.MatrizMundo.ToString().Replace('{', '\n').Replace('}', ' ');
         }
     }
 

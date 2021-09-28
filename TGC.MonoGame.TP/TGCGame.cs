@@ -60,6 +60,7 @@ namespace TGC.MonoGame.TP
         private int CantidadModelos { get; set; }
 
         private List<Modelo> ModelosUsados { get; set; }
+        private Matrix FloorWorld;
 
         /// <summary>
         ///     Se llama una sola vez, al principio cuando se ejecuta el ejemplo.
@@ -87,10 +88,12 @@ namespace TGC.MonoGame.TP
             BattleCarTextures = new List<Texture2D>();
             
             TargetCamera = new TargetCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f, Vector3.Zero);
+            
             FreeCamera = new FreeCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f);
 
             tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
 
+            FloorWorld = Matrix.CreateScale(200f);
 
             base.Initialize();
         }
@@ -143,47 +146,59 @@ namespace TGC.MonoGame.TP
 
             //cargo los modelos de los autos comunes en sus posiciones iniciales 
             //a una lista de matrices de mundo
+
             var rotacion = Quaternion.CreateFromAxisAngle(-Vector3.UnitY, MathHelper.Pi / 3);
             var matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(100f, 0f, -100f);
+                Matrix.CreateTranslation(135, 0, -321);
             ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
 
+            
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 3);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(-100f, 0f, -100f);
+                Matrix.CreateTranslation(-374, 0f, -523);
             ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.White, CarTextures));
 
-            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitX, MathHelper.Pi / 8);
-            matrizInicial = Matrix.CreateScale(0.2f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(0f, 0f, -100f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
-
-            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
-            matrizInicial = Matrix.CreateScale(0.4f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(0f, -80f, -100f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Blue, CarTextures));
-
+            
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(0f, 50f, -100f);
+                Matrix.CreateTranslation(179f, 0f, -77f);
+            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
+
+
+            
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
+            matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(115f, 0f, -533f);
+            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Blue, CarTextures));
+
+
+            
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
+            matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(-81f, 0f, 159f);
             ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Green, CarTextures));
 
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
-            matrizInicial = Matrix.CreateScale(0.1f) *
+            matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(-80f, 30f, -100f);
+                Matrix.CreateTranslation(-80f, 0f, -160f);
             ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.GreenYellow, CarTextures));
+
+
+
+
+
 
 
             matrizInicial = Matrix.CreateScale(0.01f) *
                 Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(-80f, 30f, -100f);
+                Matrix.CreateTranslation(-200f, 0f, -120f);
             ModelosUsados.Add(new Modelo(battleCarModel, matrizInicial, Color.Orange, BattleCarTextures));
 
             quad = new QuadPrimitive(GraphicsDevice);
@@ -251,21 +266,23 @@ namespace TGC.MonoGame.TP
                 Effect.Parameters["Projection"].SetValue(FreeCamera.Projection);
             }
 
+            
+            Effect.Parameters["DiffuseColor"]?.SetValue(Color.Green.ToVector3());
+            Effect.Parameters["ModelTexture"]?.SetValue(FloorTexture);
+            quad.Draw(Effect);
+
+
             foreach (var auto in ModelosUsados)
             {
                 auto.Draw(Effect);
             }
 
-            Effect.Parameters["DiffuseColor"]?.SetValue(Color.Green.ToVector3());
-            Effect.Parameters["ModelTexture"].SetValue(FloorTexture);
-            quad.Draw(Effect);
-
-
             //Esto es para escribir el texto que aparece en la pantalla con la ubicacion del modelo
             ubicacionModelo = ModelosUsados[IndexListaModelo].getWorldMatrixAsString();
 
             SpriteBatch.Begin();
-            SpriteBatch.DrawString(spriteFont, "modelo actual: " + ubicacionModelo, new Vector2(0, 0), Color.Red);
+            SpriteBatch.DrawString(spriteFont, "MODELO ACTUAL: " + IndexListaModelo.ToString() 
+                + '\n' + ubicacionModelo, new Vector2(0, 0), Color.Magenta);
             SpriteBatch.End();
         }
 

@@ -64,11 +64,12 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-	float4 TextureColor = tex2D(textureSampler, input.TextureCoordinate);
-	//TextureColor.a = 1;
+	return tex2D(textureSampler, input.TextureCoordinate);
 
 	//devuelvo un color mezclado para poder distingir el auto seleccionado (que es magenta)
-	return TextureColor; //+ float4(DiffuseColor, 0.5);
+	//float4 TextureColor = tex2D(textureSampler, input.TextureCoordinate);
+	//TextureColor.a = 0.5;
+	//return TextureColor + float4(DiffuseColor, 0.5);
 }
 
 technique BasicColorDrawing
