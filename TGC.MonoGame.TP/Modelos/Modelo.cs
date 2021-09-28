@@ -10,7 +10,7 @@ using TGC.MonoGame.TP.Modelos;
 
 namespace TGC.MonoGame.TP.Modelos
 {
-    abstract class Modelo
+    class Modelo
     {
         public Matrix MatrizMundo { get; set; }
 
@@ -24,13 +24,29 @@ namespace TGC.MonoGame.TP.Modelos
 
         private float VelocidadTranslacion;
 
-        public void Update(GameTime gameTime)
+        public List<Texture2D> TexturasModelo;
+
+        private Texture2D TexturaEnEdicion;
+
+        private int IndexOfTextureToDraw;
+
+        public Modelo(Model modelo, Matrix matriz, Color colorModelo, List<Texture2D> Texturas)
+        {
+            MatrizMundo = matriz;
+            MiModelo = modelo;
+            ColorModelo = colorModelo;
+            TexturasModelo = Texturas;
+        }
+
+        public void Update(GameTime gameTime, Texture2D textura)
         {
             EstaSeleccionado = true;
 
             var elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             ActualizarPosicion(elapsedTime);
+
+            TexturaEnEdicion = textura;
         }
 
         public void ActualizarPosicion(float elapsedTime) {
@@ -102,20 +118,41 @@ namespace TGC.MonoGame.TP.Modelos
 
         public void Draw(Effect efecto)
         {
-            if(EstaSeleccionado)
-                efecto.Parameters["DiffuseColor"].SetValue(Color.Magenta.ToVector3());
-            else
-                efecto.Parameters["DiffuseColor"].SetValue(ColorModelo.ToVector3());
+            IndexOfTextureToDraw = 0;
+
+            if (EstaSeleccionado)
+                DibujarConOtraTextura(efecto);
+
+            else 
+                DibujarNormalmente(efecto);
+
+            EstaSeleccionado = false;
+        }
+
+        public void DibujarNormalmente(Effect efecto) {
+            efecto.Parameters["DiffuseColor"]?.SetValue(ColorModelo.ToVector3());
 
             foreach (var mesh in MiModelo.Meshes)
             {
                 World = mesh.ParentBone.Transform * MatrizMundo;
 
                 efecto.Parameters["World"].SetValue(World);
+                efecto.Parameters["ModelTexture"].SetValue(TexturasModelo[IndexOfTextureToDraw++]);
                 mesh.Draw();
             }
+        }
 
-            EstaSeleccionado = false;
+        public void DibujarConOtraTextura(Effect efecto) {
+            efecto.Parameters["DiffuseColor"]?.SetValue(Color.Magenta.ToVector3());
+
+            foreach (var mesh in MiModelo.Meshes)
+            {
+                World = mesh.ParentBone.Transform * MatrizMundo;
+
+                efecto.Parameters["World"].SetValue(World);
+                efecto.Parameters["ModelTexture"].SetValue(TexturaEnEdicion);
+                mesh.Draw();
+            }
         }
 
         public Matrix getWorldMatrix()
