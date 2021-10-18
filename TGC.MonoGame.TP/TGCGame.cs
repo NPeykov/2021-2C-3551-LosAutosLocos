@@ -44,6 +44,7 @@ namespace TGC.MonoGame.TP
         private Model CarModel { get; set; }
         private Model battleCarModel { get; set; }
         private Effect Effect { get; set; }
+        private Effect TilingEffect { get; set; }
         private float Rotation { get; set; }
         private FreeCamera FreeCamera { get; set; }
         private TargetCamera TargetCamera { get; set; }
@@ -52,15 +53,14 @@ namespace TGC.MonoGame.TP
         private TipoDeCamara tipoDeCamara { get; set; }
         private Texture2D FloorTexture { get; set; }
         private List<Texture2D> CarTextures { get; set; }
-
         private List<Texture2D> BattleCarTextures { get; set; }
-
         private Texture2D TexturaDeAutoEnEdicion;
         private int IndexListaModelo { get; set; }
         private int CantidadModelos { get; set; }
-
         private List<Modelo> ModelosUsados { get; set; }
-        private Matrix FloorWorld;
+        private List<Pared> Walls { get; set; }
+        private Texture2D WallTexture { get; set; }
+        private Matrix viewProjection;
 
         /// <summary>
         ///     Se llama una sola vez, al principio cuando se ejecuta el ejemplo.
@@ -93,7 +93,9 @@ namespace TGC.MonoGame.TP
 
             tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
 
-            FloorWorld = Matrix.CreateScale(200f);
+            Walls = new List<Pared>();
+
+
 
             base.Initialize();
         }
@@ -117,11 +119,16 @@ namespace TGC.MonoGame.TP
             // En el juego no pueden usar BasicEffect de MG, deben usar siempre efectos propios.
             Effect = Content.Load<Effect>(ContentFolderEffects + "BasicShader");
 
+            TilingEffect = Content.Load<Effect>(ContentFolderEffects + "TextureTiling");
+            TilingEffect.Parameters["Tiling"].SetValue(new Vector2(10f, 10f));
+
             spriteFont = Content.Load<SpriteFont>(ContentFolderSpriteFonts + "Arial");
 
             FloorTexture = Content.Load<Texture2D>(ContentFolderTextures + "grass");
 
             TexturaDeAutoEnEdicion = Content.Load<Texture2D>(ContentFolderTextures + "ground");
+
+            WallTexture = Content.Load<Texture2D>(ContentFolderTextures + "stones");
 
             // Asigno el efecto que cargue a cada parte del mesh.
             // Un modelo puede tener mas de 1 mesh internamente.
@@ -191,17 +198,29 @@ namespace TGC.MonoGame.TP
             ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.GreenYellow, CarTextures));
 
 
-
-
-
-
-
             matrizInicial = Matrix.CreateScale(0.01f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(-200f, 0f, -120f);
             ModelosUsados.Add(new Modelo(battleCarModel, matrizInicial, Color.Orange, BattleCarTextures));
 
+
+            //quad
             quad = new QuadPrimitive(GraphicsDevice);
+
+            //walls
+            var scale = new Vector3(800f, 1f, 100f);
+            var PosNuevaPared = new Matrix();
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+            scale = new Vector3(100, 1f, 800);
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitX * 800f + Vector3.UnitY * 100f);
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitX * 800f + Vector3.UnitY * 100f);
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            viewProjection = new Matrix();
 
             CantidadModelos = ModelosUsados.Count;
 
@@ -259,18 +278,28 @@ namespace TGC.MonoGame.TP
             if (tipoDeCamara == TipoDeCamara.ORIGINAL_SCENE) {
                 Effect.Parameters["View"].SetValue(TargetCamera.View);
                 Effect.Parameters["Projection"].SetValue(TargetCamera.Projection);
+                viewProjection = TargetCamera.View * TargetCamera.Projection;
             }
 
             if (tipoDeCamara == TipoDeCamara.FREE_VIEW) {
                 Effect.Parameters["View"].SetValue(FreeCamera.View);
                 Effect.Parameters["Projection"].SetValue(FreeCamera.Projection);
+                viewProjection = FreeCamera.View * FreeCamera.Projection;
             }
 
-            
-            Effect.Parameters["DiffuseColor"]?.SetValue(Color.Green.ToVector3());
-            Effect.Parameters["ModelTexture"]?.SetValue(FloorTexture);
-            quad.Draw(Effect);
+            TilingEffect.Parameters["WorldViewProjection"].SetValue(Matrix.CreateScale(800) * viewProjection);
+            TilingEffect.Parameters["Texture"].SetValue(FloorTexture);
+            quad.Draw(TilingEffect);
 
+            TilingEffect.Parameters["Texture"].SetValue(WallTexture);
+            TilingEffect.Parameters["WorldViewProjection"].SetValue(Walls[0].getWorldMatrix() * viewProjection);
+            quad.Draw(TilingEffect);
+            TilingEffect.Parameters["WorldViewProjection"].SetValue(Walls[1].getWorldMatrix() * viewProjection);
+            quad.Draw(TilingEffect);
+            TilingEffect.Parameters["WorldViewProjection"].SetValue(Walls[2].getWorldMatrix() * viewProjection);
+            quad.Draw(TilingEffect);
+            TilingEffect.Parameters["WorldViewProjection"].SetValue(Walls[3].getWorldMatrix() * viewProjection);
+            quad.Draw(TilingEffect);
 
             foreach (var auto in ModelosUsados)
             {
