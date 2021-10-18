@@ -154,71 +154,14 @@ namespace TGC.MonoGame.TP
             //cargo los modelos de los autos comunes en sus posiciones iniciales 
             //a una lista de matrices de mundo
 
-            var rotacion = Quaternion.CreateFromAxisAngle(-Vector3.UnitY, MathHelper.Pi / 3);
-            var matrizInicial = Matrix.CreateScale(0.2f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(135, 0, -321);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
-
-            
-            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 3);
-            matrizInicial = Matrix.CreateScale(0.2f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(-374, 0f, -523);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.White, CarTextures));
-
-            
-            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
-            matrizInicial = Matrix.CreateScale(0.2f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(179f, 0f, -77f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
-
-
-            
-            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
-            matrizInicial = Matrix.CreateScale(0.2f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(115f, 0f, -533f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Blue, CarTextures));
-
-
-            
-            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
-            matrizInicial = Matrix.CreateScale(0.2f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(-81f, 0f, 159f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Green, CarTextures));
-
-
-            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
-            matrizInicial = Matrix.CreateScale(0.2f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(-80f, 0f, -160f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.GreenYellow, CarTextures));
-
-
-            matrizInicial = Matrix.CreateScale(0.01f) *
-                Matrix.CreateFromQuaternion(rotacion) *
-                Matrix.CreateTranslation(-200f, 0f, -120f);
-            ModelosUsados.Add(new Modelo(battleCarModel, matrizInicial, Color.Orange, BattleCarTextures));
+            InicializarAutos();
 
 
             //quad
             quad = new QuadPrimitive(GraphicsDevice);
 
             //walls
-            var scale = new Vector3(800f, 1f, 100f);
-            var PosNuevaPared = new Matrix();
-            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
-            Walls.Add(new Pared(PosNuevaPared, WallTexture));
-            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
-            Walls.Add(new Pared(PosNuevaPared, WallTexture));
-            scale = new Vector3(100, 1f, 800);
-            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitX * 800f + Vector3.UnitY * 100f);
-            Walls.Add(new Pared(PosNuevaPared, WallTexture));
-            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitX * 800f + Vector3.UnitY * 100f);
-            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+            InicializarParedes();
 
             viewProjection = new Matrix();
 
@@ -291,15 +234,12 @@ namespace TGC.MonoGame.TP
             TilingEffect.Parameters["Texture"].SetValue(FloorTexture);
             quad.Draw(TilingEffect);
 
-            TilingEffect.Parameters["Texture"].SetValue(WallTexture);
-            TilingEffect.Parameters["WorldViewProjection"].SetValue(Walls[0].getWorldMatrix() * viewProjection);
-            quad.Draw(TilingEffect);
-            TilingEffect.Parameters["WorldViewProjection"].SetValue(Walls[1].getWorldMatrix() * viewProjection);
-            quad.Draw(TilingEffect);
-            TilingEffect.Parameters["WorldViewProjection"].SetValue(Walls[2].getWorldMatrix() * viewProjection);
-            quad.Draw(TilingEffect);
-            TilingEffect.Parameters["WorldViewProjection"].SetValue(Walls[3].getWorldMatrix() * viewProjection);
-            quad.Draw(TilingEffect);
+
+            foreach (var wall in Walls) {
+                TilingEffect.Parameters["Texture"].SetValue(WallTexture);
+                TilingEffect.Parameters["WorldViewProjection"].SetValue(wall.getWorldMatrix() * viewProjection);
+                quad.Draw(TilingEffect);
+            }
 
             foreach (var auto in ModelosUsados)
             {
@@ -324,6 +264,72 @@ namespace TGC.MonoGame.TP
             Content.Unload();
 
             base.UnloadContent();
+        }
+
+        //FUNCIONES PARA SACAR LOGICA DE INITIALIZE
+
+        private void InicializarAutos() {
+            var rotacion = Quaternion.CreateFromAxisAngle(-Vector3.UnitY, MathHelper.Pi / 3);
+            var matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(135, 0, -321);
+            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
+
+
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 3);
+            matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(-374, 0f, -523);
+            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.White, CarTextures));
+
+
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
+            matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(179f, 0f, -77f);
+            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
+
+
+
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
+            matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(115f, 0f, -533f);
+            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Blue, CarTextures));
+
+
+
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
+            matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(-81f, 0f, 159f);
+            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Green, CarTextures));
+
+
+            rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
+            matrizInicial = Matrix.CreateScale(0.2f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(-80f, 0f, -160f);
+            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.GreenYellow, CarTextures));
+
+
+            matrizInicial = Matrix.CreateScale(0.01f) *
+                Matrix.CreateFromQuaternion(rotacion) *
+                Matrix.CreateTranslation(-200f, 0f, -120f);
+            ModelosUsados.Add(new Modelo(battleCarModel, matrizInicial, Color.Orange, BattleCarTextures));
+        }
+        private void InicializarParedes() {
+            var scale = new Vector3(800f, 1f, 100f);
+            var PosNuevaPared = new Matrix();
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+            scale = new Vector3(100, 1f, 800);
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitX * 800f + Vector3.UnitY * 100f);
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitX * 800f + Vector3.UnitY * 100f);
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
         }
 
     }
