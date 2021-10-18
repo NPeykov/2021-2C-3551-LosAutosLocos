@@ -63,12 +63,23 @@ namespace TGC.MonoGame.TP.Modelos
 
             KeyboardState estadoTeclado = Keyboard.GetState();
 
-            if (estadoTeclado.IsKeyDown(Keys.LeftShift) && estadoTeclado.IsKeyDown(Keys.W)) {
+            if (estadoTeclado.IsKeyDown(Keys.LeftShift) && estadoTeclado.IsKeyDown(Keys.W))
+            {
                 Velocidad += Aceleracion * elapsedTime;
-                Velocidad = MathHelper.Clamp(Velocidad, 0, 80); 
-            } else {
-                Velocidad = 10;
+                Velocidad = MathHelper.Clamp(Velocidad, 0, 80);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
             }
+            else if (estadoTeclado.IsKeyDown(Keys.W))
+            {
+                Velocidad = 10;
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
+            }
+            else {
+                Velocidad -= Aceleracion * elapsedTime;
+                Velocidad = MathHelper.Clamp(Velocidad, 0, 80);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
+            }
+
 
             if (estadoTeclado.IsKeyDown(Keys.LeftControl) && !estadoTeclado.IsKeyDown(Keys.LeftShift)) {
                 Velocidad += Aceleracion * elapsedTime;
@@ -77,17 +88,13 @@ namespace TGC.MonoGame.TP.Modelos
 
             //TRANSLACIONES
             if (estadoTeclado.IsKeyDown(Keys.D))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Right * Velocidad);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Right * VelocidadBase);
             if (estadoTeclado.IsKeyDown(Keys.A))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Left * Velocidad);
-            if (estadoTeclado.IsKeyDown(Keys.W))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Left * VelocidadBase);
+            //if (estadoTeclado.IsKeyDown(Keys.W))
+            //    MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
             if (estadoTeclado.IsKeyDown(Keys.S))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Forward * Velocidad);
-            //if (estadoTeclado.IsKeyDown(Keys.Q))
-            //    MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Up * VelocidadTranslacion);
-            //if (estadoTeclado.IsKeyDown(Keys.E))
-            //    MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Down * VelocidadTranslacion);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Forward * VelocidadBase);
 
             //ESCALADOS
             if (estadoTeclado.IsKeyDown(Keys.Subtract) && estadoTeclado.IsKeyDown(Keys.LeftShift))

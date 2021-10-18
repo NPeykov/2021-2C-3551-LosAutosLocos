@@ -107,9 +107,9 @@ namespace TGC.MonoGame.TP
         /// </summary>
         protected override void LoadContent()
         {
-            // Aca es donde deberiamos cargar todos los contenido necesarios antes de iniciar el juego.
+
             SpriteBatch = new SpriteBatch(GraphicsDevice);
-            
+
 
             CarModel = Content.Load<Model>(ContentFolder3D + "cars/RacingCar");
 
@@ -130,26 +130,7 @@ namespace TGC.MonoGame.TP
 
             WallTexture = Content.Load<Texture2D>(ContentFolderTextures + "stones");
 
-            // Asigno el efecto que cargue a cada parte del mesh.
-            // Un modelo puede tener mas de 1 mesh internamente.
-
-            foreach (var mesh in CarModel.Meshes) {
-                CarTextures.Add(((BasicEffect)mesh.Effects[0]).Texture);
-                foreach (var meshPart in mesh.MeshParts) {
-                    meshPart.Effect = Effect;
-                }
-            }
-            // Un mesh puede tener mas de 1 mesh part (cada 1 puede tener su propio efecto).
-
-
-            foreach (var mesh in battleCarModel.Meshes)
-            {
-                BattleCarTextures.Add(((BasicEffect)mesh.Effects[0]).Texture);
-                foreach (var meshPart in mesh.MeshParts)
-                {
-                    meshPart.Effect = Effect;
-                }
-            }
+            
 
            
             InicializarAutos();
@@ -210,6 +191,8 @@ namespace TGC.MonoGame.TP
             // Aca deberiamos poner toda la logia de renderizado del juego.
             GraphicsDevice.Clear(Color.Black);
 
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+
             //Actualizo projeccion segun tipo de camara
             if (tipoDeCamara == TipoDeCamara.ORIGINAL_SCENE) {
                 Effect.Parameters["View"].SetValue(TargetCamera.View);
@@ -246,6 +229,8 @@ namespace TGC.MonoGame.TP
             SpriteBatch.DrawString(spriteFont, "MODELO ACTUAL: " + IndexListaModelo.ToString() 
                 + '\n' + ubicacionModelo, new Vector2(0, 0), Color.Magenta);
             SpriteBatch.End();
+
+            
         }
 
         /// <summary>
@@ -262,6 +247,28 @@ namespace TGC.MonoGame.TP
         //FUNCIONES PARA SACAR LOGICA DE INITIALIZE
 
         private void InicializarAutos() {
+            // Asigno el efecto que cargue a cada parte del mesh.
+            // Un modelo puede tener mas de 1 mesh internamente.
+
+            foreach (var mesh in CarModel.Meshes)
+            {
+                CarTextures.Add(((BasicEffect)mesh.Effects[0]).Texture);
+                foreach (var meshPart in mesh.MeshParts)
+                {
+                    meshPart.Effect = Effect;
+                }
+            }
+            // Un mesh puede tener mas de 1 mesh part (cada 1 puede tener su propio efecto).
+            foreach (var mesh in battleCarModel.Meshes)
+            {
+                BattleCarTextures.Add(((BasicEffect)mesh.Effects[0]).Texture);
+                foreach (var meshPart in mesh.MeshParts)
+                {
+                    meshPart.Effect = Effect;
+                }
+            }
+
+
             var rotacion = Quaternion.CreateFromAxisAngle(-Vector3.UnitY, MathHelper.Pi / 3);
             var matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
@@ -311,14 +318,15 @@ namespace TGC.MonoGame.TP
                 Matrix.CreateTranslation(-200f, 0f, -120f);
             ModelosUsados.Add(new Modelo(battleCarModel, matrizInicial, Color.Orange, BattleCarTextures));
         }
+
         private void InicializarParedes() {
-            var scale = new Vector3(800f, 1f, 100f);
+            var scale = new Vector3(800f, 1f, 200f);
             var PosNuevaPared = new Matrix();
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
-            scale = new Vector3(100, 1f, 800);
+            scale = new Vector3(200, 1f, 800);
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitX * 800f + Vector3.UnitY * 100f);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitX * 800f + Vector3.UnitY * 100f);
