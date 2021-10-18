@@ -151,22 +151,15 @@ namespace TGC.MonoGame.TP
                 }
             }
 
-            //cargo los modelos de los autos comunes en sus posiciones iniciales 
-            //a una lista de matrices de mundo
-
+           
             InicializarAutos();
-
-
-            //quad
-            quad = new QuadPrimitive(GraphicsDevice);
-
-            //walls
             InicializarParedes();
+
+            quad = new QuadPrimitive(GraphicsDevice);
 
             viewProjection = new Matrix();
 
             CantidadModelos = ModelosUsados.Count;
-
             IndexListaModelo = 0;
 
             base.LoadContent();

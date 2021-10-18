@@ -22,7 +22,7 @@ namespace TGC.MonoGame.TP.Modelos
 
         private Matrix World;
 
-        private float VelocidadTranslacion;
+        private float Velocidad;
 
         public List<Texture2D> TexturasModelo;
 
@@ -30,46 +30,64 @@ namespace TGC.MonoGame.TP.Modelos
 
         private int IndexOfTextureToDraw;
 
+        private float VelocidadBase;
+
+        private float Tiempo;
+
+        private float Aceleracion;
+
         public Modelo(Model modelo, Matrix matriz, Color colorModelo, List<Texture2D> Texturas)
         {
             MatrizMundo = matriz;
             MiModelo = modelo;
             ColorModelo = colorModelo;
             TexturasModelo = Texturas;
+
+            Velocidad = 0;
+            VelocidadBase = 10;
+            Aceleracion = 50;
+            Tiempo = 0;
         }
 
         public void Update(GameTime gameTime, Texture2D textura)
         {
             EstaSeleccionado = true;
 
-            var elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            ActualizarPosicion(elapsedTime);
+            ActualizarPosicion(gameTime);
 
             TexturaEnEdicion = textura;
         }
 
-        public void ActualizarPosicion(float elapsedTime) {
+        public void ActualizarPosicion(GameTime gameTime) {
+            var elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             KeyboardState estadoTeclado = Keyboard.GetState();
 
-            if (estadoTeclado.IsKeyDown(Keys.LeftShift))
-                VelocidadTranslacion = elapsedTime * 200;
-            else
-                VelocidadTranslacion = elapsedTime * 50;
+            if (estadoTeclado.IsKeyDown(Keys.LeftShift) && estadoTeclado.IsKeyDown(Keys.W)) {
+                Velocidad += Aceleracion * elapsedTime;
+                Velocidad = MathHelper.Clamp(Velocidad, 0, 80); 
+            } else {
+                Velocidad = 10;
+            }
+
+            if (estadoTeclado.IsKeyDown(Keys.LeftControl) && !estadoTeclado.IsKeyDown(Keys.LeftShift)) {
+                Velocidad += Aceleracion * elapsedTime;
+            }
+
 
             //TRANSLACIONES
             if (estadoTeclado.IsKeyDown(Keys.D))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Right * VelocidadTranslacion);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Right * Velocidad);
             if (estadoTeclado.IsKeyDown(Keys.A))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Left * VelocidadTranslacion);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Left * Velocidad);
             if (estadoTeclado.IsKeyDown(Keys.W))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Up * VelocidadTranslacion);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
             if (estadoTeclado.IsKeyDown(Keys.S))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Down * VelocidadTranslacion);
-            if (estadoTeclado.IsKeyDown(Keys.Q))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Forward * VelocidadTranslacion);
-            if (estadoTeclado.IsKeyDown(Keys.E))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * VelocidadTranslacion);
+                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Forward * Velocidad);
+            //if (estadoTeclado.IsKeyDown(Keys.Q))
+            //    MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Up * VelocidadTranslacion);
+            //if (estadoTeclado.IsKeyDown(Keys.E))
+            //    MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Down * VelocidadTranslacion);
 
             //ESCALADOS
             if (estadoTeclado.IsKeyDown(Keys.Subtract) && estadoTeclado.IsKeyDown(Keys.LeftShift))
@@ -167,7 +185,8 @@ namespace TGC.MonoGame.TP.Modelos
             String vectorFoward = MatrizMundo.Forward.ToString();
             return "POSICION: " + posicion + '\n'
                 + "VECTOR UP: " + vectorUp + '\n'
-                + "VECTOR FOWARD: " + vectorFoward;
+                + "VECTOR FOWARD: " + vectorFoward + '\n'
+                + "VELOCIDAD ACTUAL: " + Velocidad;
             //return this.MatrizMundo.ToString().Replace('{', '\n').Replace('}', ' ');
         }
     }
