@@ -78,24 +78,13 @@ namespace TGC.MonoGame.TP
             GraphicsDevice.RasterizerState = rasterizerState;
             // Seria hasta aca.
 
-            // Configuramos nuestras matrices de la escena.
-            //World = Matrix.Identity;
-            //View = Matrix.CreateLookAt(Vector3.UnitZ, Vector3.Zero, Vector3.Up);
-            //Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 1, 250);
-
-            ModelosUsados = new List<Modelo>();
-            CarTextures = new List<Texture2D>();
-            BattleCarTextures = new List<Texture2D>();
             
             TargetCamera = new TargetCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f, Vector3.Zero);
             
             FreeCamera = new FreeCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f);
 
             tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
-
-            Walls = new List<Pared>();
-
-
+           
 
             base.Initialize();
         }
@@ -130,9 +119,7 @@ namespace TGC.MonoGame.TP
 
             WallTexture = Content.Load<Texture2D>(ContentFolderTextures + "stones");
 
-            
 
-           
             InicializarAutos();
             InicializarParedes();
 
@@ -206,7 +193,7 @@ namespace TGC.MonoGame.TP
                 viewProjection = FreeCamera.View * FreeCamera.Projection;
             }
 
-            TilingEffect.Parameters["WorldViewProjection"].SetValue(Matrix.CreateScale(800) * viewProjection);
+            TilingEffect.Parameters["WorldViewProjection"].SetValue(Matrix.CreateScale(2000) * viewProjection);
             TilingEffect.Parameters["Texture"].SetValue(FloorTexture);
             quad.Draw(TilingEffect);
 
@@ -247,8 +234,9 @@ namespace TGC.MonoGame.TP
         //FUNCIONES PARA SACAR LOGICA DE INITIALIZE
 
         private void InicializarAutos() {
-            // Asigno el efecto que cargue a cada parte del mesh.
-            // Un modelo puede tener mas de 1 mesh internamente.
+            ModelosUsados = new List<Modelo>();
+            CarTextures = new List<Texture2D>();
+            BattleCarTextures = new List<Texture2D>();
 
             foreach (var mesh in CarModel.Meshes)
             {
@@ -320,16 +308,86 @@ namespace TGC.MonoGame.TP
         }
 
         private void InicializarParedes() {
-            var scale = new Vector3(800f, 1f, 200f);
+            Walls = new List<Pared>();
             var PosNuevaPared = new Matrix();
-            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
+            var BoundingBox = new BoundingBox();
+            var minVector = Vector3.One * 0.25f;
+
+            var scale = new Vector3(500f, 1f, 200f);
+            
+            //********** Paredes plano XY en Z=-2000, yendo de X=-2000 a X=2000 ****************//
+            //Pared 1:      |**|  |  |  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-1500f, 200f, -2000f));
+            BoundingBox = new BoundingBox(new Vector3(-200f, 0f, -200f) - minVector, new Vector3(200f, 200f, -200f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
-            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitZ * 800f + Vector3.UnitY * 100f);
+
+            //Pared 2:      |  |**|  |  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-500f, 200f, -2000f));
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
-            scale = new Vector3(200, 1f, 800);
-            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(-Vector3.UnitX * 800f + Vector3.UnitY * 100f);
+
+            //Pared 3:      |  |  |**|  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(500f, 200f, -2000f));
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
-            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(Vector3.UnitX * 800f + Vector3.UnitY * 100f);
+
+            //Pared 4:      |  |  |  |**|
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(1500f, 200f, -2000f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+
+            //********** Paredes plano XY en Z=2000, yendo de X=-2000 a X=2000 ****************//
+            //Pared 5:      |**|  |  |  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-1500f, 200f, 2000f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 6:      |  |**|  |  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-500f, 200f, 2000f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 7:      |  |  |**|  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(500f, 200f, 2000f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 8:      |  |  |  |**|
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(1500f, 200f, 2000f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+
+
+            scale = new Vector3(200f, 1f, 500f);
+
+            //********** Paredes plano YZ en X=-2000, yendo de Z=-2000 a Z=2000 ****************//
+            //Pared 9:      |**|  |  |  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-2000f, 200f, -1500f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 10:      |  |**|  |  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-2000f, 200f, 500f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 11:      |  |  |**|  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-2000f, 200f, -500f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 12:      |  |  |  |**|
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-2000f, 200f, 1500f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+
+            //********** Paredes plano YZ en X=2000, yendo de Z=-2000 a Z=2000 ****************//
+            //Pared 13:      |**|  |  |  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(2000f, 200f, -1500f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 14:      |  |**|  |  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(2000f, 200f, -500f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 15:      |  |  |**|  |
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(2000f, 200f, 500f));
+            Walls.Add(new Pared(PosNuevaPared, WallTexture));
+
+            //Pared 16:      |  |  |  |**|
+            PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationZ(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(2000f, 200f, 1500f));
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
         }
 
