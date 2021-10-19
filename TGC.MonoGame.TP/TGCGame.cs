@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TGC.MonoGame.TP.Cameras;
+using TGC.MonoGame.TP.Collisions;
 using TGC.MonoGame.TP.FigurasBasicas;
 using TGC.MonoGame.TP.Modelos;
 
@@ -166,6 +167,7 @@ namespace TGC.MonoGame.TP
             // Basado en el tiempo que paso se va generando una rotacion.
             Rotation += Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
 
+                
             base.Update(gameTime);
         }
 
@@ -203,6 +205,7 @@ namespace TGC.MonoGame.TP
                 TilingEffect.Parameters["WorldViewProjection"].SetValue(wall.getWorldMatrix() * viewProjection);
                 quad.Draw(TilingEffect);
             }
+
 
             foreach (var auto in ModelosUsados)
             {
@@ -318,37 +321,44 @@ namespace TGC.MonoGame.TP
             //********** Paredes plano XY en Z=-2000, yendo de X=-2000 a X=2000 ****************//
             //Pared 1:      |**|  |  |  |
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-1500f, 200f, -2000f));
-            BoundingBox = new BoundingBox(new Vector3(-200f, 0f, -200f) - minVector, new Vector3(200f, 200f, -200f) + minVector);
+            BoundingBox = new BoundingBox(new Vector3(-2000f, 0f, -2000f) - minVector, new Vector3(-1000f, 200f, -2000f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
 
             //Pared 2:      |  |**|  |  |
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-500f, 200f, -2000f));
+            BoundingBox = new BoundingBox(new Vector3(-1000f, 0f, -2000f) - minVector, new Vector3(0f, 200f, -2000f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
 
             //Pared 3:      |  |  |**|  |
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(500f, 200f, -2000f));
+            BoundingBox = new BoundingBox(new Vector3(0f, 0f, -2000f) - minVector, new Vector3(1000f, 200f, -2000f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
 
             //Pared 4:      |  |  |  |**|
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(1500f, 200f, -2000f));
+            BoundingBox = new BoundingBox(new Vector3(1000f, 0f, -2000f) - minVector, new Vector3(2000f, 200f, -2000f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
 
 
             //********** Paredes plano XY en Z=2000, yendo de X=-2000 a X=2000 ****************//
             //Pared 5:      |**|  |  |  |
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-1500f, 200f, 2000f));
+            BoundingBox = new BoundingBox(new Vector3(-2000f, 0f, 2000f) - minVector, new Vector3(-1000f, 200f, 2000f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
 
             //Pared 6:      |  |**|  |  |
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(-500f, 200f, 2000f));
+            BoundingBox = new BoundingBox(new Vector3(-1000f, 0f, 2000f) - minVector, new Vector3(0f, 200f, 2000f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
 
             //Pared 7:      |  |  |**|  |
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(500f, 200f, 2000f));
+            BoundingBox = new BoundingBox(new Vector3(0f, 0f, 2000f) - minVector, new Vector3(1000f, 200f, 2000f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
 
             //Pared 8:      |  |  |  |**|
             PosNuevaPared = Matrix.CreateScale(scale) * Matrix.CreateRotationX(-MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(1500f, 200f, 2000f));
+            BoundingBox = new BoundingBox(new Vector3(1000f, 0f, 2000f) - minVector, new Vector3(2000f, 200f, 2000f) + minVector);
             Walls.Add(new Pared(PosNuevaPared, WallTexture));
 
 
