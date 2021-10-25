@@ -10,7 +10,8 @@ namespace TGC.MonoGame.TP.Cameras
     public enum TipoDeCamara
     {
         ORIGINAL_SCENE,
-        FREE_VIEW
+        FREE_VIEW,
+        FOLLOW_CAMERA
     };
 
     /// <summary>

@@ -33,6 +33,7 @@ namespace TGC.MonoGame.TP.Cameras
             CalculateView();
         }
 
+
         public float MovementSpeed { get; set; } = 100f;
         public float MouseSensitivity { get; set; } = 5f;
 

@@ -58,6 +58,8 @@ namespace TGC.MonoGame.TP
         private Texture2D TexturaDeAutoEnEdicion;
         private int IndexListaModelo { get; set; }
         private int CantidadModelos { get; set; }
+        private FollowCamera CamaraAutoPrincipal { get; set; }
+        private Modelo AutoPrincipal { get; set; }
         private List<Modelo> ModelosUsados { get; set; }
         private List<Pared> Walls { get; set; }
         private Texture2D WallTexture { get; set; }
@@ -77,12 +79,16 @@ namespace TGC.MonoGame.TP
             var rasterizerState = new RasterizerState();
             rasterizerState.CullMode = CullMode.None;
             GraphicsDevice.RasterizerState = rasterizerState;
-            // Seria hasta aca.
+            GraphicsDevice.BlendState = BlendState.Opaque;
 
-            
+
             TargetCamera = new TargetCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f, Vector3.Zero);
             
             FreeCamera = new FreeCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f);
+
+            CamaraAutoPrincipal = new FollowCamera(GraphicsDevice.Viewport.AspectRatio);
+            //CamaraAutoPrincipal = new FollowCamera(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            //CamaraAutoPrincipal = new FollowCamera();
 
             tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
            
@@ -155,6 +161,9 @@ namespace TGC.MonoGame.TP
             if (estadoTeclado.IsKeyDown(Keys.F2))
                 tipoDeCamara = TipoDeCamara.FREE_VIEW;
 
+            if (estadoTeclado.IsKeyDown(Keys.F3))
+                tipoDeCamara = TipoDeCamara.FOLLOW_CAMERA;
+
             if (estadoTeclado.IsKeyDown(Keys.M)) {
                 if (CantidadModelos - 1 > IndexListaModelo)
                     IndexListaModelo++;
@@ -162,11 +171,14 @@ namespace TGC.MonoGame.TP
                     IndexListaModelo = 0;
             }
 
-            ModelosUsados[IndexListaModelo].Update(gameTime, TexturaDeAutoEnEdicion);
+            //ModelosUsados[IndexListaModelo].Update(gameTime, TexturaDeAutoEnEdicion);
+            AutoPrincipal.Update(gameTime);
+
 
             // Basado en el tiempo que paso se va generando una rotacion.
             Rotation += Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
 
+            CamaraAutoPrincipal.Update(gameTime, AutoPrincipal.getWorldMatrix());
                 
             base.Update(gameTime);
         }
@@ -195,6 +207,12 @@ namespace TGC.MonoGame.TP
                 viewProjection = FreeCamera.View * FreeCamera.Projection;
             }
 
+            if (tipoDeCamara == TipoDeCamara.FOLLOW_CAMERA) {
+                Effect.Parameters["View"].SetValue(CamaraAutoPrincipal.View);
+                Effect.Parameters["Projection"].SetValue(CamaraAutoPrincipal.Projection);
+                viewProjection = CamaraAutoPrincipal.View * CamaraAutoPrincipal.Projection;
+            }
+
             TilingEffect.Parameters["WorldViewProjection"].SetValue(Matrix.CreateScale(2000) * viewProjection);
             TilingEffect.Parameters["Texture"].SetValue(FloorTexture);
             quad.Draw(TilingEffect);
@@ -206,6 +224,7 @@ namespace TGC.MonoGame.TP
                 quad.Draw(TilingEffect);
             }
 
+            AutoPrincipal.Draw(Effect);
 
             foreach (var auto in ModelosUsados)
             {
@@ -264,7 +283,7 @@ namespace TGC.MonoGame.TP
             var matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(135, 0, -321);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
+            AutoPrincipal = new Modelo(CarModel, matrizInicial, Color.Red, CarTextures);
 
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 3);

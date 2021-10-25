@@ -58,6 +58,10 @@ namespace TGC.MonoGame.TP.Modelos
             TexturaEnEdicion = textura;
         }
 
+        public void Update(GameTime gameTime) {
+            ActualizarPosicion(gameTime);
+        }
+
         public void ActualizarPosicion(GameTime gameTime) {
             var elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
