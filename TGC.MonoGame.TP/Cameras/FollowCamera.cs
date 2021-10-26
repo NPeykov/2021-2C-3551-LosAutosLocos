@@ -104,8 +104,8 @@ namespace TGC.MonoGame.TP.Cameras
             // Calculo la posicion del a camara
             // tomo la posicion que estoy siguiendo, agrego un offset en los ejes Y y Derecha
             var offsetedPosition = followedPosition
-                + CurrentRightVector * AxisDistanceToTarget * 0.5f
-                + Vector3.Up * AxisDistanceToTarget * 0.5f;
+                + CurrentRightVector * AxisDistanceToTarget * 0.4f
+                + Vector3.Up * AxisDistanceToTarget * 0.4f;
 
 
             // Calculo el vector Arriba actualizado

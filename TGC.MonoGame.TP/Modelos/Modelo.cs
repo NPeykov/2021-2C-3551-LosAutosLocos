@@ -53,16 +53,12 @@ namespace TGC.MonoGame.TP.Modelos
         {
             EstaSeleccionado = true;
 
-            ActualizarPosicion(gameTime);
+            Update(gameTime);
 
             TexturaEnEdicion = textura;
         }
 
         public void Update(GameTime gameTime) {
-            ActualizarPosicion(gameTime);
-        }
-
-        public void ActualizarPosicion(GameTime gameTime) {
             var elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             KeyboardState estadoTeclado = Keyboard.GetState();
@@ -92,14 +88,13 @@ namespace TGC.MonoGame.TP.Modelos
 
             //TRANSLACIONES
             if (estadoTeclado.IsKeyDown(Keys.D))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Right * VelocidadBase);
+                MatrizMundo = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, -elapsedTime)) * MatrizMundo;
             if (estadoTeclado.IsKeyDown(Keys.A))
-                MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Left * VelocidadBase);
-            //if (estadoTeclado.IsKeyDown(Keys.W))
-            //    MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
+                MatrizMundo = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, elapsedTime)) * MatrizMundo;
             if (estadoTeclado.IsKeyDown(Keys.S))
                 MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Forward * VelocidadBase);
 
+            /*
             //ESCALADOS
             if (estadoTeclado.IsKeyDown(Keys.Subtract) && estadoTeclado.IsKeyDown(Keys.LeftShift))
                 MatrizMundo = Matrix.CreateScale(elapsedTime * 50) * MatrizMundo;
@@ -107,7 +102,7 @@ namespace TGC.MonoGame.TP.Modelos
             if (estadoTeclado.IsKeyDown(Keys.Add) && estadoTeclado.IsKeyDown(Keys.LeftShift))
                 MatrizMundo = Matrix.CreateScale(1 / (elapsedTime * 50)) * MatrizMundo;
 
-
+            
             //ROTACIONES
             if (estadoTeclado.IsKeyDown(Keys.Z)) {
                 if (estadoTeclado.IsKeyDown(Keys.Add))
@@ -143,6 +138,7 @@ namespace TGC.MonoGame.TP.Modelos
                     Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, -elapsedTime))
                     * MatrizMundo;
             }
+            */
         }
 
         public void Draw(Effect efecto)
