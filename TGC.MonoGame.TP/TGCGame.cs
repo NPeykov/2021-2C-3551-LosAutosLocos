@@ -43,10 +43,9 @@ namespace TGC.MonoGame.TP
         private SpriteBatch SpriteBatch { get; set; }
         private SpriteFont spriteFont { get; set; }
         private Model CarModel { get; set; }
-        private Model battleCarModel { get; set; }
+        private BattleCar BattleCar { get; set; }
         private Effect Effect { get; set; }
         private Effect TilingEffect { get; set; }
-        private float Rotation { get; set; }
         private FreeCamera FreeCamera { get; set; }
         private TargetCamera TargetCamera { get; set; }
         private QuadPrimitive quad { get; set; }
@@ -59,8 +58,8 @@ namespace TGC.MonoGame.TP
         private int IndexListaModelo { get; set; }
         private int CantidadModelos { get; set; }
         private FollowCamera CamaraAutoPrincipal { get; set; }
-        private Modelo AutoPrincipal { get; set; }
-        private List<Modelo> ModelosUsados { get; set; }
+        private NormalCar AutoPrincipal { get; set; }
+        private List<NormalCar> ModelosUsados { get; set; }
         private List<Pared> Walls { get; set; }
         private Texture2D WallTexture { get; set; }
         private Matrix viewProjection;
@@ -87,8 +86,6 @@ namespace TGC.MonoGame.TP
             FreeCamera = new FreeCamera(GraphicsDevice.Viewport.AspectRatio, Vector3.One * 100f);
 
             CamaraAutoPrincipal = new FollowCamera(GraphicsDevice.Viewport.AspectRatio);
-            //CamaraAutoPrincipal = new FollowCamera(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-            //CamaraAutoPrincipal = new FollowCamera();
 
             tipoDeCamara = TipoDeCamara.ORIGINAL_SCENE;
            
@@ -106,10 +103,7 @@ namespace TGC.MonoGame.TP
 
             SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-
             CarModel = Content.Load<Model>(ContentFolder3D + "cars/RacingCar");
-
-            battleCarModel = Content.Load<Model>(ContentFolder3D + "CombatVehicle/Vehicle");
 
             // Cargo un efecto basico propio declarado en el Content pipeline.
             // En el juego no pueden usar BasicEffect de MG, deben usar siempre efectos propios.
@@ -174,10 +168,6 @@ namespace TGC.MonoGame.TP
             //ModelosUsados[IndexListaModelo].Update(gameTime, TexturaDeAutoEnEdicion);
             AutoPrincipal.Update(gameTime);
 
-
-            // Basado en el tiempo que paso se va generando una rotacion.
-            Rotation += Convert.ToSingle(gameTime.ElapsedGameTime.TotalSeconds);
-
             CamaraAutoPrincipal.Update(gameTime, AutoPrincipal.getWorldMatrix());
                 
             base.Update(gameTime);
@@ -224,18 +214,20 @@ namespace TGC.MonoGame.TP
                 quad.Draw(TilingEffect);
             }
 
-            AutoPrincipal.Draw(Effect);
-
             foreach (var auto in ModelosUsados)
             {
-                auto.Draw(Effect);
+                auto.Draw();
             }
 
+            AutoPrincipal.Draw();
+
+            BattleCar.Draw();
+
             //Esto es para escribir el texto que aparece en la pantalla con la ubicacion del modelo
-            ubicacionModelo = ModelosUsados[IndexListaModelo].getWorldMatrixAsString();
+            ubicacionModelo = AutoPrincipal.getWorldMatrixAsString();
 
             SpriteBatch.Begin();
-            SpriteBatch.DrawString(spriteFont, "MODELO ACTUAL: " + IndexListaModelo.ToString() 
+            SpriteBatch.DrawString(spriteFont, "MODELO ACTUAL: Auto Principal"
                 + '\n' + ubicacionModelo, new Vector2(0, 0), Color.Magenta);
             SpriteBatch.End();
 
@@ -256,77 +248,52 @@ namespace TGC.MonoGame.TP
         //FUNCIONES PARA SACAR LOGICA DE INITIALIZE
 
         private void InicializarAutos() {
-            ModelosUsados = new List<Modelo>();
-            CarTextures = new List<Texture2D>();
-            BattleCarTextures = new List<Texture2D>();
-
-            foreach (var mesh in CarModel.Meshes)
-            {
-                CarTextures.Add(((BasicEffect)mesh.Effects[0]).Texture);
-                foreach (var meshPart in mesh.MeshParts)
-                {
-                    meshPart.Effect = Effect;
-                }
-            }
-            // Un mesh puede tener mas de 1 mesh part (cada 1 puede tener su propio efecto).
-            foreach (var mesh in battleCarModel.Meshes)
-            {
-                BattleCarTextures.Add(((BasicEffect)mesh.Effects[0]).Texture);
-                foreach (var meshPart in mesh.MeshParts)
-                {
-                    meshPart.Effect = Effect;
-                }
-            }
-
+            ModelosUsados = new List<NormalCar>();
 
             var rotacion = Quaternion.CreateFromAxisAngle(-Vector3.UnitY, MathHelper.Pi / 3);
             var matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(135, 0, -321);
-            AutoPrincipal = new Modelo(CarModel, matrizInicial, Color.Red, CarTextures);
+            AutoPrincipal = new NormalCar(Content, matrizInicial, Color.Red);
 
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 3);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(-374, 0f, -523);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.White, CarTextures));
+            ModelosUsados.Add(new NormalCar(Content, matrizInicial, Color.White));
 
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(179f, 0f, -77f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Red, CarTextures));
+            ModelosUsados.Add(new NormalCar(Content, matrizInicial, Color.Red));
 
 
-
+            
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(115f, 0f, -533f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Blue, CarTextures));
-
-
+            ModelosUsados.Add(new NormalCar(Content, matrizInicial, Color.Blue));
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 8);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(-81f, 0f, 159f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.Green, CarTextures));
-
+            ModelosUsados.Add(new NormalCar(Content, matrizInicial, Color.Green));
 
             rotacion = Quaternion.CreateFromAxisAngle(Vector3.UnitY, MathHelper.Pi / 2);
             matrizInicial = Matrix.CreateScale(0.2f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(-80f, 0f, -160f);
-            ModelosUsados.Add(new Modelo(CarModel, matrizInicial, Color.GreenYellow, CarTextures));
-
-
+            ModelosUsados.Add(new NormalCar(Content, matrizInicial, Color.GreenYellow));
+            
             matrizInicial = Matrix.CreateScale(0.01f) *
                 Matrix.CreateFromQuaternion(rotacion) *
                 Matrix.CreateTranslation(-200f, 0f, -120f);
-            ModelosUsados.Add(new Modelo(battleCarModel, matrizInicial, Color.Orange, BattleCarTextures));
+            BattleCar = new BattleCar(Content, matrizInicial, Color.Orange);
         }
 
         private void InicializarParedes() {

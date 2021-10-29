@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TGC.MonoGame.TP.Cameras;
@@ -10,11 +11,13 @@ using TGC.MonoGame.TP.Modelos;
 
 namespace TGC.MonoGame.TP.Modelos
 {
-    class Modelo
-    {
-        public Matrix MatrizMundo { get; set; }
 
-        public Model MiModelo;
+
+    class NormalCar
+    {
+        private Effect Effect { get; set; }
+        public Matrix MatrizMundo { get; set; }
+        public Model CarModel { get; set; }
 
         public Color ColorModelo;
 
@@ -23,31 +26,39 @@ namespace TGC.MonoGame.TP.Modelos
         private Matrix World;
 
         private float Velocidad;
-
-        public List<Texture2D> TexturasModelo;
+        public Texture2D CarTexture { set; get; }
 
         private Texture2D TexturaEnEdicion;
-
-        private int IndexOfTextureToDraw;
 
         private float VelocidadBase;
 
         private float Tiempo;
 
         private float Aceleracion;
+        private ContentManager ContentManager { get; set; }
 
-        public Modelo(Model modelo, Matrix matriz, Color colorModelo, List<Texture2D> Texturas)
-        {
-            MatrizMundo = matriz;
-            MiModelo = modelo;
-            ColorModelo = colorModelo;
-            TexturasModelo = Texturas;
+        public NormalCar(ContentManager content, Matrix WorldMatrix, Color ColorModel) {
+            ContentManager = content;
+            MatrizMundo = WorldMatrix;
+            ColorModelo = ColorModel;
+
+            LoadContent();
 
             Velocidad = 0;
             VelocidadBase = 10;
             Aceleracion = 50;
             Tiempo = 0;
+
+            foreach (var mesh in CarModel.Meshes)
+            {
+                foreach (var meshPart in mesh.MeshParts)
+                {
+                    meshPart.Effect = Effect;
+                }
+            }
+
         }
+
 
         public void Update(GameTime gameTime, Texture2D textura)
         {
@@ -91,8 +102,11 @@ namespace TGC.MonoGame.TP.Modelos
                 MatrizMundo = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, -elapsedTime)) * MatrizMundo;
             if (estadoTeclado.IsKeyDown(Keys.A))
                 MatrizMundo = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, elapsedTime)) * MatrizMundo;
-            if (estadoTeclado.IsKeyDown(Keys.S))
+            if (estadoTeclado.IsKeyDown(Keys.S)) {
                 MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Forward * VelocidadBase);
+                CarModel.Bones[2].Transform = Matrix.CreateRotationX(MathHelper.Pi / 4) * CarModel.Bones[2].Transform;
+            }
+               
 
             /*
             //ESCALADOS
@@ -141,41 +155,39 @@ namespace TGC.MonoGame.TP.Modelos
             */
         }
 
-        public void Draw(Effect efecto)
+        public void Draw()
         {
-            IndexOfTextureToDraw = 0;
-
             if (EstaSeleccionado)
-                DibujarConOtraTextura(efecto);
+                DibujarConOtraTextura();
 
             else 
-                DibujarNormalmente(efecto);
+                DibujarNormalmente();
 
             EstaSeleccionado = false;
         }
 
-        public void DibujarNormalmente(Effect efecto) {
-            efecto.Parameters["DiffuseColor"]?.SetValue(ColorModelo.ToVector3());
+        public void DibujarNormalmente() {
+            Effect.Parameters["ModelTexture"].SetValue(CarTexture);
 
-            foreach (var mesh in MiModelo.Meshes)
+            foreach (var mesh in CarModel.Meshes)
             {
                 World = mesh.ParentBone.Transform * MatrizMundo;
 
-                efecto.Parameters["World"].SetValue(World);
-                efecto.Parameters["ModelTexture"].SetValue(TexturasModelo[IndexOfTextureToDraw++]);
+                Effect.Parameters["World"].SetValue(World);
                 mesh.Draw();
             }
+
         }
 
-        public void DibujarConOtraTextura(Effect efecto) {
-            efecto.Parameters["DiffuseColor"]?.SetValue(Color.Magenta.ToVector3());
+        public void DibujarConOtraTextura() {
+            Effect.Parameters["DiffuseColor"]?.SetValue(Color.Magenta.ToVector3());
+            Effect.Parameters["ModelTexture"].SetValue(CarTexture);
 
-            foreach (var mesh in MiModelo.Meshes)
+            foreach (var mesh in CarModel.Meshes)
             {
                 World = mesh.ParentBone.Transform * MatrizMundo;
 
-                efecto.Parameters["World"].SetValue(World);
-                efecto.Parameters["ModelTexture"].SetValue(TexturaEnEdicion);
+                Effect.Parameters["World"].SetValue(World);
                 mesh.Draw();
             }
         }
@@ -195,6 +207,14 @@ namespace TGC.MonoGame.TP.Modelos
                 + "VECTOR FOWARD: " + vectorFoward + '\n'
                 + "VELOCIDAD ACTUAL: " + Velocidad;
             //return this.MatrizMundo.ToString().Replace('{', '\n').Replace('}', ' ');
+        }
+
+
+
+        private void LoadContent() {
+            CarModel = ContentManager.Load<Model>("Models/cars/RacingCar");
+            Effect = ContentManager.Load<Effect>("Effects/BasicShader");
+            CarTexture = ContentManager.Load<Texture2D>("Textures/NormalCarTextures/Vehicle_basecolor");
         }
     }
 
