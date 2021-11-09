@@ -37,6 +37,7 @@ namespace TGC.MonoGame.TP.Modelos
         private float Aceleracion;
         private ContentManager ContentManager { get; set; }
 
+
         public NormalCar(ContentManager content, Matrix WorldMatrix, Color ColorModel) {
             ContentManager = content;
             MatrizMundo = WorldMatrix;
@@ -49,6 +50,7 @@ namespace TGC.MonoGame.TP.Modelos
             Aceleracion = 50;
             Tiempo = 0;
 
+           
             foreach (var mesh in CarModel.Meshes)
             {
                 foreach (var meshPart in mesh.MeshParts)
@@ -56,7 +58,6 @@ namespace TGC.MonoGame.TP.Modelos
                     meshPart.Effect = Effect;
                 }
             }
-
         }
 
 
@@ -79,16 +80,19 @@ namespace TGC.MonoGame.TP.Modelos
                 Velocidad += Aceleracion * elapsedTime;
                 Velocidad = MathHelper.Clamp(Velocidad, 0, 80);
                 MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
+                TransformarMatrizRueda(Matrix.CreateRotationX(MathHelper.Pi / 12 * Velocidad));
             }
             else if (estadoTeclado.IsKeyDown(Keys.W))
             {
                 Velocidad = 10;
                 MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
+                TransformarMatrizRueda(Matrix.CreateRotationX(MathHelper.Pi / 12 * Velocidad));
             }
             else {
                 Velocidad -= Aceleracion * elapsedTime;
                 Velocidad = MathHelper.Clamp(Velocidad, 0, 80);
                 MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Backward * Velocidad);
+                TransformarMatrizRueda(Matrix.CreateRotationX(MathHelper.Pi / 12 * Velocidad));
             }
 
 
@@ -98,61 +102,21 @@ namespace TGC.MonoGame.TP.Modelos
 
 
             //TRANSLACIONES
-            if (estadoTeclado.IsKeyDown(Keys.D))
+            if (estadoTeclado.IsKeyDown(Keys.D)) {
                 MatrizMundo = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, -elapsedTime)) * MatrizMundo;
-            if (estadoTeclado.IsKeyDown(Keys.A))
+                //TransformarRuedasDelanteras(Matrix.CreateRotationY(MathHelper.Pi / 26));
+            }
+
+            if (estadoTeclado.IsKeyDown(Keys.A)) {
                 MatrizMundo = Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, elapsedTime)) * MatrizMundo;
+                //TransformarRuedasDelanteras(Matrix.CreateRotationY(-MathHelper.Pi / 26));
+            }
+                
             if (estadoTeclado.IsKeyDown(Keys.S)) {
                 MatrizMundo *= Matrix.CreateTranslation(MatrizMundo.Forward * VelocidadBase);
-                CarModel.Bones[2].Transform = Matrix.CreateRotationX(MathHelper.Pi / 4) * CarModel.Bones[2].Transform;
+                TransformarMatrizRueda(Matrix.CreateRotationX(- MathHelper.Pi / 12 * Velocidad));
             }
                
-
-            /*
-            //ESCALADOS
-            if (estadoTeclado.IsKeyDown(Keys.Subtract) && estadoTeclado.IsKeyDown(Keys.LeftShift))
-                MatrizMundo = Matrix.CreateScale(elapsedTime * 50) * MatrizMundo;
-
-            if (estadoTeclado.IsKeyDown(Keys.Add) && estadoTeclado.IsKeyDown(Keys.LeftShift))
-                MatrizMundo = Matrix.CreateScale(1 / (elapsedTime * 50)) * MatrizMundo;
-
-            
-            //ROTACIONES
-            if (estadoTeclado.IsKeyDown(Keys.Z)) {
-                if (estadoTeclado.IsKeyDown(Keys.Add))
-                    MatrizMundo =
-                    Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitZ, elapsedTime))
-                    * MatrizMundo;
-                if (estadoTeclado.IsKeyDown(Keys.Subtract))
-                    MatrizMundo =
-                    Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitZ, -elapsedTime))
-                    * MatrizMundo;
-            }
-
-
-
-            if (estadoTeclado.IsKeyDown(Keys.X)) {
-                if (estadoTeclado.IsKeyDown(Keys.Add))
-                    MatrizMundo =
-                    Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitX, elapsedTime))
-                    * MatrizMundo;
-                if (estadoTeclado.IsKeyDown(Keys.Subtract))
-                    MatrizMundo =
-                    Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitX, -elapsedTime))
-                    * MatrizMundo;
-            }
-
-            if (estadoTeclado.IsKeyDown(Keys.C)) {
-                if (estadoTeclado.IsKeyDown(Keys.Add))
-                    MatrizMundo =
-                    Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, elapsedTime))
-                    * MatrizMundo;
-                if (estadoTeclado.IsKeyDown(Keys.Subtract))
-                    MatrizMundo =
-                    Matrix.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, -elapsedTime))
-                    * MatrizMundo;
-            }
-            */
         }
 
         public void Draw()
@@ -210,11 +174,23 @@ namespace TGC.MonoGame.TP.Modelos
         }
 
 
-
         private void LoadContent() {
             CarModel = ContentManager.Load<Model>("Models/cars/RacingCar");
             Effect = ContentManager.Load<Effect>("Effects/BasicShader");
             CarTexture = ContentManager.Load<Texture2D>("Textures/NormalCarTextures/Vehicle_basecolor");
+        }
+
+        private void TransformarMatrizRueda(Matrix transformacion) {
+            CarModel.Bones[2].Transform = transformacion * CarModel.Bones[2].Transform;
+            CarModel.Bones[3].Transform = transformacion * CarModel.Bones[3].Transform;
+            CarModel.Bones[4].Transform = transformacion * CarModel.Bones[4].Transform;
+            CarModel.Bones[5].Transform = transformacion * CarModel.Bones[5].Transform;
+        }
+
+        private void TransformarRuedasDelanteras(Matrix transformacion)
+        {
+            CarModel.Bones[2].Transform = transformacion * CarModel.Bones[2].Transform;
+            CarModel.Bones[3].Transform = transformacion * CarModel.Bones[3].Transform;
         }
     }
 
